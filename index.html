@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎂 Birthday Card Wizard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FDF6EC;
+    --warm: #F5E6D0;
+    --blush: #F2C4CE;
+    --rose: #E8899A;
+    --berry: #C1587A;
+    --plum: #7B3F6E;
+    --gold: #E8B84B;
+    --sage: #8BAF8B;
+    --ink: #2A1F2D;
+    --muted: #7A6A7A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, var(--blush) 1.5px, transparent 1.5px),
+      radial-gradient(circle, var(--gold) 1px, transparent 1px),
+      radial-gradient(circle, var(--sage) 1px, transparent 1px);
+    background-size: 60px 60px, 90px 90px, 45px 45px;
+    background-position: 0 0, 30px 30px, 15px 45px;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  header {
+    text-align: center;
+    padding: 48px 0 36px;
+  }
+
+  .title-eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 1.15rem;
+    color: var(--berry);
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    color: var(--plum);
+    line-height: 1.1;
+    position: relative;
+    display: inline-block;
+  }
+
+  h1 .accent { color: var(--berry); font-style: italic; }
+
+  h1::after {
+    content: '🎉';
+    position: absolute;
+    right: -52px;
+    top: 0;
+    font-size: 2.2rem;
+    animation: wiggle 2s ease-in-out infinite;
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 300;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-8deg); }
+    50% { transform: rotate(10deg); }
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 36px;
+    align-items: start;
+  }
+
+  .form-panel {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 32px rgba(123,63,110,0.08), 0 1px 4px rgba(123,63,110,0.06);
+    border: 1px solid rgba(242,196,206,0.5);
+    position: sticky;
+    top: 24px;
+  }
+
+  .form-panel h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--plum);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--warm);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--rose);
+    box-shadow: 0 0 0 3px rgba(232,137,154,0.15);
+    background: white;
+  }
+
+  textarea { resize: vertical; min-height: 72px; }
+
+  .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .pill {
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1.5px solid var(--warm);
+    background: var(--cream);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .pill:hover { border-color: var(--rose); color: var(--berry); }
+  .pill.active { background: var(--plum); border-color: var(--plum); color: white; }
+
+  .divider { height: 1px; background: var(--warm); margin: 20px 0; }
+
+  .btn-generate {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--berry), var(--plum));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 18px rgba(193,88,122,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(193,88,122,0.4); }
+  .btn-generate:active { transform: translateY(0); }
+  .btn-generate:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .loading .spinner { display: block; }
+  .loading .btn-label { display: none; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .cards-column { display: flex; flex-direction: column; gap: 24px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    background: white;
+    border-radius: 24px;
+    border: 2px dashed var(--blush);
+    color: var(--muted);
+  }
+
+  .empty-state .big-emoji { font-size: 4rem; margin-bottom: 16px; display: block; }
+  .empty-state p { font-size: 1rem; line-height: 1.6; }
+
+  .card-wrapper { animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .bday-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(123,63,110,0.1), 0 2px 8px rgba(123,63,110,0.06);
+  }
+
+  .card-banner {
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.12;
+    background-image: repeating-linear-gradient(45deg, white 0px, white 4px, transparent 4px, transparent 12px);
+  }
+
+  .card-banner-left { display: flex; flex-direction: column; gap: 2px; }
+
+  .card-for {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    color: white;
+  }
+
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+  .tag {
+    padding: 3px 10px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: white;
+    backdrop-filter: blur(4px);
+  }
+
+  .card-emoji-badge {
+    font-size: 2.8rem;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15));
+  }
+
+  .card-body { padding: 28px 32px 32px; position: relative; }
+
+  .card-body::before {
+    content: '"';
+    position: absolute;
+    top: 14px; left: 22px;
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--blush);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .card-message {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--ink);
+    padding-left: 24px;
+    white-space: pre-wrap;
+    font-weight: 300;
+  }
+
+  .card-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--warm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-sig { font-family: 'Caveat', cursive; font-size: 1.1rem; color: var(--berry); }
+
+  .card-copy-btn {
+    padding: 7px 16px;
+    border: 1.5px solid var(--warm);
+    border-radius: 99px;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-copy-btn:hover { border-color: var(--berry); color: var(--berry); }
+  .card-copy-btn.copied { border-color: var(--sage); color: var(--sage); }
+
+  .theme-rose .card-banner { background: linear-gradient(135deg, #E8899A, #C1587A); }
+  .theme-ocean .card-banner { background: linear-gradient(135deg, #5BA8D0, #2E6B9E); }
+  .theme-forest .card-banner { background: linear-gradient(135deg, #6AAF75, #2E7D45); }
+  .theme-gold .card-banner { background: linear-gradient(135deg, #E8B84B, #C07A1A); }
+  .theme-plum .card-banner { background: linear-gradient(135deg, #9B6BB0, #5C2E7A); }
+  .theme-coral .card-banner { background: linear-gradient(135deg, #F07A5A, #C04830); }
+  .theme-sky .card-banner { background: linear-gradient(135deg, #78C8E8, #3A8CB8); }
+  .theme-mint .card-banner { background: linear-gradient(135deg, #7DCFC0, #2E9E8F); }
+
+  .error-msg {
+    background: #fff0f0;
+    border: 1.5px solid #ffcccc;
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #c0392b;
+    font-size: 0.88rem;
+    margin-top: 12px;
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .form-panel { position: static; }
+    h1::after { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header>
+    <span class="title-eyebrow">✨ The one & only</span>
+    <h1>Birthday <span class="accent">Card</span> Wizard</h1>
+    <p class="subtitle">Personalized wishes that actually feel personal — powered by AI magic 🪄</p>
+  </header>
+
+  <div class="layout">
+    <aside class="form-panel">
+      <h2>🎁 Card Details</h2>
+
+      <div class="field-group">
+        <div class="field">
+          <label>Their Name *</label>
+          <input type="text" id="name" placeholder="e.g. Sarah" />
+        </div>
+        <div class="field">
+          <label>Age (optional)</label>
+          <input type="number" id="age" placeholder="e.g. 30" min="1" max="120" />
+        </div>
+        <div class="field full">
+          <label>Profession</label>
+          <input type="text" id="profession" placeholder="e.g. Software Developer, Teacher…" />
+        </div>
+        <div class="field full">
+          <label>Hobbies / Interests</label>
+          <input type="text" id="hobbies" placeholder="e.g. hiking, coffee, cats, coding…" />
+        </div>
+        <div class="field full">
+          <label>Anything extra (optional)</label>
+          <textarea id="extra" placeholder="Inside jokes, recent life events, shared memories…"></textarea>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field" style="margin-bottom:14px">
+        <label>Tone / Vibe</label>
+        <div class="pill-group" id="tone-group">
+          <span class="pill active" data-val="funny">😂 Funny</span>
+          <span class="pill" data-val="heartfelt">💖 Heartfelt</span>
+          <span class="pill" data-val="roast">🔥 Roast</span>
+          <span class="pill" data-val="poetic">🌸 Poetic</span>
+          <span class="pill" data-val="professional">🤝 Professional</span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:14px">
+        <label>Length</label>
+        <div class="pill-group" id="length-group">
+          <span class="pill active" data-val="short">Short & Sweet</span>
+          <span class="pill" data-val="medium">Medium</span>
+          <span class="pill" data-val="long">Long & Elaborate</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <button class="btn-generate" id="generateBtn" onclick="generateCard()">
+        <span class="spinner" id="spinner"></span>
+        <span class="btn-label">✨ Generate Birthday Card</span>
+      </button>
+    </aside>
+
+    <main class="cards-column" id="cardsColumn">
+      <div class="empty-state" id="emptyState">
+        <span class="big-emoji">🎂</span>
+        <p>Fill in the details on the left<br>and conjure up a magical birthday card!</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.pill-group').forEach(group => {
+    group.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+      });
+    });
+  });
+
+  function getActive(groupId) {
+    return document.querySelector(`#${groupId} .pill.active`)?.dataset.val || '';
+  }
+
+  const themes = ['rose','ocean','forest','gold','plum','coral','sky','mint'];
+  let themeIndex = 0;
+
+  function getEmoji(profession, tone) {
+    const prof = (profession || '').toLowerCase();
+    if (prof.match(/software|developer|engineer|programmer|coder/)) return '💻';
+    if (prof.match(/teacher|professor|educator/)) return '📚';
+    if (prof.match(/doctor|nurse|medical|surgeon/)) return '🩺';
+    if (prof.match(/chef|cook|baker/)) return '👨‍🍳';
+    if (prof.match(/designer|artist|creative/)) return '🎨';
+    if (prof.match(/lawyer|attorney|legal/)) return '⚖️';
+    if (prof.match(/finance|accountant|banker/)) return '💰';
+    if (prof.match(/music|musician|singer/)) return '🎵';
+    if (prof.match(/writer|author|journalist/)) return '✍️';
+    if (prof.match(/scientist|researcher/)) return '🔬';
+    if (tone === 'roast') return '🔥';
+    if (tone === 'poetic') return '🌸';
+    if (tone === 'heartfelt') return '💖';
+    return '🎉';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+  }
+
+  async function generateCard() {
+    const name = document.getElementById('name').value.trim();
+    if (!name) {
+      document.getElementById('name').focus();
+      document.getElementById('name').style.borderColor = 'var(--rose)';
+      setTimeout(() => document.getElementById('name').style.borderColor = '', 1500);
+      return;
+    }
+
+    const age = document.getElementById('age').value;
+    const profession = document.getElementById('profession').value.trim();
+    const hobbies = document.getElementById('hobbies').value.trim();
+    const extra = document.getElementById('extra').value.trim();
+    const tone = getActive('tone-group');
+    const length = getActive('length-group');
+
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    document.getElementById('errorMsg').style.display = 'none';
+
+    const prompt = buildPrompt(name, age, profession, hobbies, extra, tone, length);
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+   
+      const data = await response.json();
+      console.log(data)
+      const message = data.choices[0].message.content.trim();
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Server error');
+      }
+
+      renderCard(name, age, profession, tone, message);
+    } catch (err) {
+      showError('⚠️ ' + (err.message || 'Something went wrong. Please try again.'));
+    }
+
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+
+  function buildPrompt(name, age, profession, hobbies, extra, tone, length) {
+    const parts = [`Write a birthday card message for ${name}`];
+    if (age) parts.push(`who is turning ${age}`);
+    if (profession) parts.push(`They work as a ${profession}`);
+    if (hobbies) parts.push(`Their hobbies/interests include: ${hobbies}`);
+    if (extra) parts.push(`Additional context: ${extra}`);
+
+    const toneMap = {
+      funny: 'Make it genuinely funny with clever wordplay and humor relevant to their profession/hobbies. Include a pun if possible.',
+      heartfelt: 'Make it warm, sincere, and emotionally touching.',
+      roast: 'Write a loving roast — playfully mock their profession/habits/age with affection.',
+      poetic: 'Write it in a poetic, lyrical style with vivid imagery.',
+      professional: 'Keep it warm but polished and appropriate for a professional setting.'
+    };
+
+    const lengthMap = {
+      short: 'Keep it to 2-4 sentences — punchy and memorable.',
+      medium: 'Write 2-3 short paragraphs.',
+      long: 'Write 4-5 paragraphs — elaborate and full of personality.'
+    };
+
+    parts.push(toneMap[tone] || toneMap.funny);
+    parts.push(lengthMap[length] || lengthMap.medium);
+    parts.push('Use specific references to their profession, hobbies, or age. No generic messages!');
+    return parts.join('. ');
+  }
+
+  function renderCard(name, age, profession, tone, message) {
+    document.getElementById('emptyState')?.remove();
+
+    const theme = themes[themeIndex % themes.length];
+    themeIndex++;
+    const emoji = getEmoji(profession, tone);
+
+    const toneLabel = { funny:'😂 Funny', heartfelt:'💖 Heartfelt', roast:'🔥 Roast', poetic:'🌸 Poetic', professional:'🤝 Professional' }[tone] || tone;
+    const tags = [];
+    if (age) tags.push(`🎂 Turning ${age}`);
+    if (profession) tags.push(`💼 ${profession}`);
+    tags.push(toneLabel);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'card-wrapper';
+    wrapper.innerHTML = `
+      <div class="bday-card theme-${theme}">
+        <div class="card-banner">
+          <div class="card-banner-left">
+            <span class="card-for">Birthday card for</span>
+            <span class="card-name">${escHtml(name)} 🎉</span>
+            <div class="card-meta">
+              ${tags.map(t => `<span class="tag">${escHtml(t)}</span>`).join('')}
+            </div>
+          </div>
+          <span class="card-emoji-badge">${emoji}</span>
+        </div>
+        <div class="card-body">
+          <p class="card-message">${escHtml(message)}</p>
+          <div class="card-footer">
+            <span class="card-sig">With love & cake 🎂</span>
+            <button class="card-copy-btn" onclick="copyCard(this, \`${message.replace(/`/g,"'")}\`)">
+              📋 Copy
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const col = document.getElementById('cardsColumn');
+    col.insertBefore(wrapper, col.firstChild);
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function copyCard(btn, message) {
+    try {
+      await navigator.clipboard.writeText(message);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+    } catch {}
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
